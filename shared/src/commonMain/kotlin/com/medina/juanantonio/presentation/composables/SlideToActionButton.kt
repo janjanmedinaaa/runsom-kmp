@@ -48,6 +48,7 @@ fun SlideToActionButton(
     borderColor: Color = Color.White,
     backgroundColor: Color = Color.Transparent,
     knobColor: Color = Color.White,
+    loadingSpinnerColor: Color = Color.Black,
     contentColor: Color = Color.White,
     onCompleted: suspend () -> Unit,
 ) {
@@ -63,7 +64,7 @@ fun SlideToActionButton(
     val offsetX = remember { Animatable(0f) }
 
     val maxOffset = remember(size, knobSizePx) {
-        (size.width - knobSizePx - 8.dp.value).coerceAtLeast(0f)
+        (size.width - knobSizePx - 32.dp.value).coerceAtLeast(0f)
     }
 
     val actualBorderColor =
@@ -127,18 +128,14 @@ fun SlideToActionButton(
                 .clip(CircleShape)
                 .background(actualKnobColor)
                 .pointerInput(enabled, loading, maxOffset) {
-
                     if (!enabled || loading) {
                         return@pointerInput
                     }
 
                     detectHorizontalDragGestures(
                         onDragEnd = {
-
                             scope.launch {
-
                                 if (offsetX.value >= maxOffset * 0.9f) {
-
                                     offsetX.animateTo(
                                         targetValue = maxOffset,
                                         animationSpec = tween(
@@ -165,7 +162,6 @@ fun SlideToActionButton(
                     ) { _, dragAmount ->
 
                         scope.launch {
-
                             offsetX.snapTo(
                                 (offsetX.value + dragAmount)
                                     .coerceIn(0f, maxOffset)
@@ -179,22 +175,17 @@ fun SlideToActionButton(
             CompositionLocalProvider(
                 LocalContentColor provides actualContentColor
             ) {
-
                 AnimatedContent(
                     targetState = loading,
                     label = "loading_animation"
                 ) { isLoading ->
-
                     if (isLoading) {
-
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             strokeWidth = 2.dp,
-                            color = actualContentColor
+                            color = loadingSpinnerColor
                         )
-
                     } else {
-
                         icon()
                     }
                 }
