@@ -12,8 +12,9 @@ The concept is simple:
 3. Complete real-world activities tracked through Strava.
 4. Unlock your money as you make progress.
 
-Runsom is designed around the idea that people are often more motivated to avoid losing money than
-they are to earn rewards. By placing your own funds at stake, every kilometer becomes meaningful.
+Runsom is designed around the idea that people are more motivated when they have 
+something meaningful to work toward. By having a tangible reward for physical activities, people 
+would be more inspired to reach their goal.
 
 > ⚠️ Project Status: Active Development
 >
@@ -38,12 +39,10 @@ Example:
 
 * Create a contract worth ₱500
 * Set reward rate to ₱10/km
-* Deposit ₱500 into the Escrow Account
+* Creating a Contract automatically deposits ₱500 into the Escrow Account
 * Complete activities through Strava
 * Receive ₱10 for every valid kilometer completed
 * Continue until the contract is fulfilled
-
-The goal is not to earn new money, but to unlock money that was intentionally placed at risk.
 
 ---
 
@@ -72,6 +71,8 @@ Rewards are calculated using:
 ```text
 Completed Kilometers × Reward Per Kilometer
 ```
+
+Submitting a 3.9KM Run would only get you 3KM worth of Rewards. (I apologize in advance to anyone being taxed by Strava.)
 
 ---
 
@@ -137,8 +138,8 @@ To build and run your own version of Runsom, you will need:
 
 Runsom uses OAuth authentication to access activities from your Strava account.
 
-> Note: Access to the Strava API may require an eligible Strava account and approval of a developer
-> application.
+> Note: Access to the Strava API Settings requires an eligible Strava account 
+> and paid subscription.
 
 ---
 
@@ -213,8 +214,6 @@ This includes:
 * Activities
 * Settings
 * Coins.PH Configuration
-
-No Runsom backend server is required.
 
 ---
 
