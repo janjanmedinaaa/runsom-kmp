@@ -21,9 +21,7 @@ would be more inspired to reach their goal.
 > Runsom is currently a proof of concept and should not be considered production-ready. Features and
 > contract rules may change as the project evolves.
 
----
-
-# How It Works
+## How It Works
 
 Runsom uses two Coins.PH accounts:
 
@@ -44,9 +42,7 @@ Example:
 * Receive ₱10 for every valid kilometer completed
 * Continue until the contract is fulfilled
 
----
-
-# Tech Stack
+## Tech Stack
 
 * Compose Multiplatform (Desktop)
 * Kotlin Multiplatform (KMP)
@@ -58,9 +54,7 @@ Example:
 * Strava API
 * Coins.PH API
 
----
-
-# Contract Rules
+## Contract Rules
 
 Runsom applies several rules when validating activities and calculating rewards.
 
@@ -74,13 +68,9 @@ Completed Kilometers × Reward Per Kilometer
 
 Submitting a 3.9KM Run would only get you 3KM worth of Rewards. (I apologize in advance to anyone being taxed by Strava.)
 
----
-
 ### 2. Only activities completed after contract creation are valid
 
 Activities recorded before a contract was created cannot be submitted.
-
----
 
 ### 3. Minimum Distance Requirements
 
@@ -96,16 +86,12 @@ A 2 km run would not qualify.
 
 The default minimum distance is **1 km**.
 
----
-
 ### 4. Maximum Activity Contracts
 
 Contracts may limit the total number of activities that can be submitted.
 
 When a contract has a maximum activity limit, the final activity must satisfy any remaining distance
 required to complete the contract.
-
----
 
 ### 5. Claimable Kilometers
 
@@ -125,11 +111,9 @@ Only **3 km** will be rewarded because that is all that remains to fulfill the c
 
 The application displays claimable kilometers before submission.
 
----
+## Setup Requirements
 
-# Setup Requirements
-
-## Strava
+### Strava
 
 To build and run your own version of Runsom, you will need:
 
@@ -141,9 +125,7 @@ Runsom uses OAuth authentication to access activities from your Strava account.
 > Note: Access to the Strava API Settings requires an eligible Strava account 
 > and paid subscription.
 
----
-
-## Coins.PH
+### Coins.PH
 
 ### Owner Account
 
@@ -153,8 +135,6 @@ Required:
 * Secret Key
 
 These credentials are stored locally on your device and are never transmitted to a Runsom server.
-
----
 
 ### Escrow Account
 
@@ -179,9 +159,7 @@ This enables automatic payouts after successful activity submission.
 > Recommended: Use an escrow account owned by a trusted friend, partner, family member, or a
 > separate personal account dedicated to holding contract funds.
 
----
-
-# Current Features
+## Current Features
 
 ### Strava Integration
 
@@ -215,8 +193,6 @@ This includes:
 * Settings
 * Coins.PH Configuration
 
----
-
 ### Strava Logout Behavior
 
 For security and consistency, logging out of a Strava account will remove all existing contracts,
@@ -226,11 +202,9 @@ including:
 * Fulfilled Contracts
 * Historical Contract Data
 
----
+## Use Cases
 
-# Use Cases
-
-## Self-Motivation
+### Self-Motivation
 
 Create contracts using your own money and unlock funds through completed activities.
 
@@ -242,25 +216,19 @@ Example:
 50 km Goal
 ```
 
----
-
-## Partner Reward System
+### Partner Reward System
 
 Create a contract for your spouse, partner, child, friend, or training partner.
 
 Reward them for completing activities while maintaining accountability through an escrow account.
 
----
-
-## Fitness Accountability Groups
+### Fitness Accountability Groups
 
 Friends can act as each other's escrow partners.
 
 This creates an additional layer of commitment and social accountability.
 
----
-
-## Habit Building
+### Habit Building
 
 Use Runsom to encourage:
 
@@ -270,9 +238,7 @@ Use Runsom to encourage:
 * Swimming
 * Other Strava-supported activities
 
----
-
-## Goal-Based Challenges
+### Goal-Based Challenges
 
 Create contracts around specific goals:
 
@@ -281,19 +247,15 @@ Create contracts around specific goals:
 * Finish a cycling challenge
 * Prepare for a race or event
 
----
+## Platforms
 
-# Platforms
-
-## Currently Supported
+### Currently Supported
 
 * Desktop (Windows, macOS, Linux)
 
 Desktop is currently the primary development target.
 
----
-
-## Planned
+### Planned
 
 * Android
 * iOS
@@ -304,9 +266,7 @@ the future.
 However, desktop remains the current focus, particularly because Coins.PH API integrations often
 rely on IP-whitelisting requirements that are easier to manage in a desktop environment.
 
----
-
-# Security
+## Security
 
 Runsom follows a local-first design philosophy.
 
@@ -323,9 +283,7 @@ Users are responsible for securing:
 
 Always use trusted escrow partners and review contract settings carefully before transferring funds.
 
----
-
-# Disclaimer
+## Disclaimer
 
 Runsom is an experimental project intended for personal motivation and accountability.
 
@@ -337,3 +295,7 @@ Users are solely responsible for:
 * API credentials
 
 Use at your own risk.
+
+## Screenshots
+
+![Home Sample Image](screenshots/home-ui-sample.png)
