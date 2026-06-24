@@ -40,38 +40,36 @@ class SubmitActivityViewModel(
 
     private var job: Job? = null
 
-    fun submitActivity(contractId: Int, onFinish: () -> Unit) {
+    fun submitActivity(contractId: Int, onFinish: (Boolean) -> Unit) {
         if (job?.isActive == true) return
         job = CoroutineScope(Dispatchers.IO).launch {
             isLoadingState.value = true
 
             val selectedActivity = stravaActivityList.value[selectedActivityIndex.value]
 
-            if (coinsPHRepository.checkIfAutoPaymentIsAvailable()) {
-                val result = coinsPHRepository.requestMoneyTransfer(
-                    amount = calculatedReward.value,
-                    customSenderName = "Runsom Activity Reward",
-                    message = "Congratulations on finishing ${selectedActivity.distanceInKm} ${selectedActivity.type}!",
-                    account = CoinsPHAccount.ESCROW
-                )
-
-                if (result is NetworkResult.Success) {
-                    coinsPHRepository.checkAccountBalance()
-                    contractRepository.addActivityToContract(contractId, selectedActivity)
-                }
+            val isAutoPaymentsAvailable = coinsPHRepository.checkIfAutoPaymentIsAvailable()
+            val message = if (isAutoPaymentsAvailable) {
+                "Congratulations on finishing ${selectedActivity.distanceInKm} ${selectedActivity.type}!"
             } else {
-                val result = coinsPHRepository.requestPaymentRequest(
-                    amount = calculatedReward.value,
-                    message = "I ${selectedActivity.type} for ${selectedActivity.distanceInKm}!"
-                )
-
-                if (result is NetworkResult.Success) {
-                    contractRepository.addActivityToContract(contractId, selectedActivity)
-                }
+                "I ${selectedActivity.type} for ${selectedActivity.distanceInKm}!"
             }
 
+            val result = coinsPHRepository.requestPayment(
+                amount = calculatedReward.value,
+                customSenderName = "Runsom Activity Reward",
+                message = message,
+                account = CoinsPHAccount.ESCROW
+            )
+
+            if (result is NetworkResult.Success) {
+                contractRepository.addActivityToContract(contractId, selectedActivity)
+            }
+
+            val isContractFinished =
+                contractRepository.getContract(contractId)?.isComplete ?: false
+
             isLoadingState.value = false
-            onFinish()
+            onFinish(isContractFinished)
         }
     }
 

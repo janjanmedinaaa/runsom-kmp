@@ -1,5 +1,6 @@
 package com.medina.juanantonio.domain.models.network.caller
 
+import com.medina.juanantonio.domain.factory.plugins.ApiBlockedException
 import com.medina.juanantonio.domain.models.network.NetworkResult
 import com.medina.juanantonio.domain.models.network.coinsph.CoinsPHApiErrorResponse
 import io.ktor.client.*
@@ -32,6 +33,8 @@ suspend inline fun <reified T> safeCoinsPhApiCall(
                 )
             }
         }
+    } catch (_: ApiBlockedException) {
+        NetworkResult.Error("API temporarily blocked. Try again later.")
     } catch (e: Exception) {
         val errorMessage = parseCoinsPhError(bodyText)
 

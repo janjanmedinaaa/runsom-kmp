@@ -33,7 +33,7 @@ suspend inline fun <reified T> safeStravaApiCall(
             }
         }
     } catch (e: Exception) {
-        val errorMessage = parseCoinsPhError(bodyText)
+        val errorMessage = parseStravaError(bodyText)
 
         NetworkResult.Error(
             message = errorMessage.ifBlank { e.message ?: "Unknown error" },

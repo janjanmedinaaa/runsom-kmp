@@ -17,7 +17,7 @@ import io.ktor.http.Parameters
 import io.ktor.http.contentType
 import kotlin.io.encoding.Base64
 
-class StravaAPIService(
+class StravaRemoteSource(
     private val client: HttpClient
 ) {
 

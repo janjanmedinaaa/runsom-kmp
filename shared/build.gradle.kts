@@ -51,6 +51,12 @@ kotlin {
                 name = "STRAVA_CLIENT_ID",
                 value = runsomProperties.getProperty("STRAVA_CLIENT_ID")
             )
+
+            buildConfigField(
+                type = FieldSpec.Type.STRING,
+                name = "RUNSOM_CHALLENGES_URL",
+                value = runsomProperties.getProperty("RUNSOM_CHALLENGES_URL")
+            )
         }
     }
 
@@ -152,6 +158,12 @@ kotlin {
     room {
         schemaDirectory("$projectDir/schemas")
     }
+}
+
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.medina.juanantonio.resources"
+    generateResClass = always
 }
 
 dependencies {

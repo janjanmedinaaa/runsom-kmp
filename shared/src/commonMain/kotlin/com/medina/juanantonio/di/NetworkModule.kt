@@ -1,7 +1,8 @@
 package com.medina.juanantonio.di
 
-import com.medina.juanantonio.data.network.CoinsPHAPIService
-import com.medina.juanantonio.data.network.StravaAPIService
+import com.medina.juanantonio.data.network.CoinsPHRemoteSource
+import com.medina.juanantonio.data.network.RunsomChallengesRemoteSource
+import com.medina.juanantonio.data.network.StravaRemoteSource
 import com.medina.juanantonio.domain.factory.CoinsPHHttpClientFactory
 import com.medina.juanantonio.domain.factory.HttpClientFactory
 import org.koin.core.qualifier.named
@@ -20,14 +21,20 @@ val networkModule = module {
     }
 
     single {
-        StravaAPIService(
+        StravaRemoteSource(
             client = get(named("defaultClient"))
         )
     }
 
     single {
-        CoinsPHAPIService(
+        CoinsPHRemoteSource(
             client = get(named("coinsPhHttpClient"))
+        )
+    }
+
+    single {
+        RunsomChallengesRemoteSource(
+            client = get(named("defaultClient"))
         )
     }
 }

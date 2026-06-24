@@ -1,6 +1,6 @@
 package com.medina.juanantonio.data.network
 
-import com.medina.juanantonio.domain.factory.useAccount
+import com.medina.juanantonio.domain.factory.plugins.useAccount
 import com.medina.juanantonio.domain.models.network.CoinsPHAccount
 import com.medina.juanantonio.domain.models.network.NetworkResult
 import com.medina.juanantonio.domain.models.network.coinsph.CheckCoinsAccountsResponse
@@ -13,7 +13,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 
-class CoinsPHAPIService(
+class CoinsPHRemoteSource(
     private val client: HttpClient
 ) {
 

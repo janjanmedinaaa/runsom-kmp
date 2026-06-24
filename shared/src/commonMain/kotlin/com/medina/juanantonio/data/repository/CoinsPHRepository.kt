@@ -1,12 +1,13 @@
 package com.medina.juanantonio.data.repository
 
-import com.medina.juanantonio.data.network.CoinsPHAPIService
+import com.medina.juanantonio.data.network.CoinsPHRemoteSource
 import com.medina.juanantonio.domain.models.CoinsPHData
 import com.medina.juanantonio.domain.models.SettingsKeys.COINSPH
 import com.medina.juanantonio.domain.models.network.CoinsPHAccount
 import com.medina.juanantonio.domain.models.network.NetworkResult
 import com.medina.juanantonio.domain.models.network.coinsph.CheckCoinsAccountsResponse
 import com.medina.juanantonio.domain.models.network.coinsph.CheckUserIPResponse
+import com.medina.juanantonio.domain.models.network.coinsph.CoinsPHTransferResponse
 import com.medina.juanantonio.domain.models.network.coinsph.RequestPaymentRequestResponse
 import com.medina.juanantonio.domain.models.network.coinsph.TransferMoneyResponse
 import com.russhwolf.settings.ExperimentalSettingsApi
@@ -24,7 +25,7 @@ import kotlin.time.Clock
 
 class CoinsPHRepository(
     private val settings: Settings,
-    private val apiService: CoinsPHAPIService
+    private val remoteSource: CoinsPHRemoteSource
 ) {
 
     private var _currentCoinsPHData = MutableStateFlow<CoinsPHData?>(null)
@@ -97,7 +98,7 @@ class CoinsPHRepository(
     }
 
     suspend fun getUserIP(): NetworkResult<CheckUserIPResponse> {
-        val result = apiService.getUserIP()
+        val result = remoteSource.getUserIP()
         return result
     }
 
@@ -122,7 +123,7 @@ class CoinsPHRepository(
             _currentCoinsPHData.value = data
         }
 
-        val result = apiService.checkAccountBalance(account)
+        val result = remoteSource.checkAccountBalance(account)
         if (result is NetworkResult.Success && account == CoinsPHAccount.MAIN) {
             _currentCoinsPHData.value = CoinsPHData(
                 pesoBalance = result.data.pesoBalance,
@@ -139,7 +140,7 @@ class CoinsPHRepository(
         message: String
     ): NetworkResult<RequestPaymentRequestResponse> {
         val savedHolderEmail = getSavedHolderEmailAccount()
-        val result = apiService.sendPaymentRequest(
+        val result = remoteSource.sendPaymentRequest(
             payerContactInfo = savedHolderEmail,
             receivingAccount = "PHP",
             amount = amount,
@@ -160,7 +161,7 @@ class CoinsPHRepository(
             else getSavedLastCoinsPHData()?.email
                 ?: return NetworkResult.Error("No Coins.PH Email Available")
 
-        val result = apiService.requestMoneyTransfer(
+        val result = remoteSource.requestMoneyTransfer(
             targetAddress = targetAddress,
             accountName = "PHP",
             amount = amount,
@@ -177,5 +178,32 @@ class CoinsPHRepository(
         }
 
         return result
+    }
+
+    suspend fun requestPayment(
+        amount: Int,
+        customSenderName: String = "",
+        message: String = "",
+        account: CoinsPHAccount = CoinsPHAccount.ESCROW
+    ): NetworkResult<CoinsPHTransferResponse> {
+        return if (checkIfAutoPaymentIsAvailable()) {
+            val result = requestMoneyTransfer(
+                amount = amount,
+                customSenderName = customSenderName,
+                message = message,
+                account = account
+            )
+
+            if (result is NetworkResult.Success) {
+                checkAccountBalance()
+            }
+
+            result
+        } else {
+            requestPaymentRequest(
+                amount = amount,
+                message = message
+            )
+        }
     }
 }

@@ -5,7 +5,6 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.medina.juanantonio.domain.models.network.strava.StravaActivity
-import kotlin.math.round
 
 @Entity(
     foreignKeys = [

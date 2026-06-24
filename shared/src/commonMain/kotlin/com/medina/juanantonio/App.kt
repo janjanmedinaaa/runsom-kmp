@@ -80,7 +80,10 @@ fun App() {
                         }
                     }
 
-//                    LoadingOverlay(isLoading)
+                    LoadingOverlay(
+                        modifier = Modifier.fillMaxSize(),
+                        visible = isLoading
+                    )
                 }
             }
         }

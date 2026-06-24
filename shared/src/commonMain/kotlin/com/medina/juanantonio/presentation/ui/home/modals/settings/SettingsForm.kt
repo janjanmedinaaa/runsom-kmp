@@ -1,6 +1,6 @@
 package com.medina.juanantonio.presentation.ui.home.modals.settings
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -100,107 +100,162 @@ fun SettingsForm(
             color = Color.Gray
         )
 
-        ElevatedCard(
+        OwnerAccountInputCard(
+            mainApiKeyState = mainApiKeyState,
+            mainApiSecretState = mainApiSecretState,
+            ipAddress = ipAddress
+        )
+
+        EscrowAccountInputCard(
+            autoPaymentsEnabled = autoPaymentsEnabled,
+            escrowApiKeyState = escrowApiKeyState,
+            escrowApiSecretState = escrowApiSecretState,
+            holderEmailAccount = holderEmailAccount
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = "Make sure all the information you have entered are valid Coins.PH data.",
+            style = MaterialTheme.typography.labelSmall,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Normal,
+            color = Color.Gray,
+            textAlign = TextAlign.Center
+        )
+
+        Button(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth(),
+            onClick = onSubmit
+        ) {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = "Save Settings"
+            )
+        }
+    }
+}
+
+@Composable
+fun OwnerAccountInputCard(
+    mainApiKeyState: TextFieldState,
+    mainApiSecretState: TextFieldState,
+    ipAddress: String
+) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
+                .background(color = Color(0xFFFAFAFA))
+                .padding(16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color(0xFFFAFAFA))
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "Coins.PH Owner Account",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
+            Text(
+                text = "Coins.PH Owner Account",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
 
+            Text(
+                text = "Make sure you have correctly IP-Whitelisted your API Key",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = "API Key",
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.Black,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            CustomTextField(
+                state = mainApiKeyState,
+                isHidden = true
+            )
+
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = "API Secret",
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.Black,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            CustomTextField(
+                state = mainApiSecretState,
+                isHidden = true
+            )
+
+            Row(modifier = Modifier.padding(top = 8.dp)) {
                 Text(
-                    text = "Make sure you have correctly IP-Whitelisted your API Key",
+                    text = "Your IP Address is: ",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
 
                 Text(
-                    modifier = Modifier.padding(top = 8.dp),
-                    text = "API Key",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.Black,
+                    text = ipAddress,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold
                 )
+            }
+        }
+    }
+}
 
-                CustomTextField(
-                    state = mainApiKeyState,
-                    isHidden = true
-                )
 
-                Text(
-                    modifier = Modifier.padding(top = 8.dp),
-                    text = "API Secret",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.Black,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                CustomTextField(
-                    state = mainApiSecretState,
-                    isHidden = true
-                )
-
-                Row(modifier = Modifier.padding(top = 8.dp)) {
+@Composable
+fun EscrowAccountInputCard(
+    autoPaymentsEnabled: MutableState<Boolean>,
+    escrowApiKeyState: TextFieldState,
+    escrowApiSecretState: TextFieldState,
+    holderEmailAccount: TextFieldState
+) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = Color(0xFFFAFAFA))
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1F)) {
                     Text(
-                        text = "Your IP Address is: ",
+                        text = "Coins.PH Escrow Account",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Text(
+                        text = "The account that holds funds until they are earned back.",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
-
-                    Text(
-                        text = ipAddress,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
                 }
-            }
-        }
 
-        ElevatedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color(0xFFFAFAFA))
-                    .padding(16.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(modifier = Modifier.weight(1F)) {
-                        Text(
-                            text = "Coins.PH Escrow Account",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-
-                        Text(
-                            text = "The account that holds funds until they are earned back.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
-                        )
+                Switch(
+                    modifier = Modifier.padding(start = 8.dp),
+                    checked = autoPaymentsEnabled.value,
+                    onCheckedChange = { value ->
+                        autoPaymentsEnabled.value = value
                     }
+                )
+            }
 
-                    Switch(
-                        modifier = Modifier.padding(start = 8.dp),
-                        checked = autoPaymentsEnabled.value,
-                        onCheckedChange = { value ->
-                            autoPaymentsEnabled.value = value
-                        }
-                    )
-                }
-
-                AnimatedVisibility(autoPaymentsEnabled.value) {
+            AnimatedContent(autoPaymentsEnabled.value) { enabled ->
+                if (enabled) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             modifier = Modifier.padding(top = 8.dp),
@@ -228,9 +283,7 @@ fun SettingsForm(
                             isHidden = true
                         )
                     }
-                }
-
-                AnimatedVisibility(!autoPaymentsEnabled.value) {
+                } else {
                     CustomTextField(
                         modifier = Modifier.padding(top = 8.dp),
                         state = holderEmailAccount,
@@ -238,30 +291,6 @@ fun SettingsForm(
                     )
                 }
             }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = "Make sure all the information you have entered are valid Coins.PH data.",
-            style = MaterialTheme.typography.labelSmall,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Normal,
-            color = Color.Gray,
-            textAlign = TextAlign.Center
-        )
-
-        Button(
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .fillMaxWidth(),
-            onClick = onSubmit
-        ) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = "Save Settings"
-            )
         }
     }
 }

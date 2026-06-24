@@ -12,8 +12,8 @@ The concept is simple:
 3. Complete real-world activities tracked through Strava.
 4. Unlock your money as you make progress.
 
-Runsom is designed around the idea that people are more motivated when they have 
-something meaningful to work toward. By having a tangible reward for physical activities, people 
+Runsom is designed around the idea that people are more motivated when they have
+something meaningful to work toward. By having a tangible reward for physical activities, people
 would be more inspired to reach their goal.
 
 > ⚠️ Project Status: Active Development
@@ -66,7 +66,8 @@ Rewards are calculated using:
 Completed Kilometers × Reward Per Kilometer
 ```
 
-Submitting a 3.9KM Run would only get you 3KM worth of Rewards. (I apologize in advance to anyone being taxed by Strava.)
+Submitting a 3.9KM Run would only get you 3KM worth of Rewards. (I apologize in advance to anyone
+being taxed by Strava.)
 
 ### 2. Only activities completed after contract creation are valid
 
@@ -122,7 +123,7 @@ To build and run your own version of Runsom, you will need:
 
 Runsom uses OAuth authentication to access activities from your Strava account.
 
-> Note: Access to the Strava API Settings requires an eligible Strava account 
+> Note: Access to the Strava API Settings requires an eligible Strava account
 > and paid subscription.
 
 ### Coins.PH
@@ -192,15 +193,6 @@ This includes:
 * Activities
 * Settings
 * Coins.PH Configuration
-
-### Strava Logout Behavior
-
-For security and consistency, logging out of a Strava account will remove all existing contracts,
-including:
-
-* Active Contracts
-* Fulfilled Contracts
-* Historical Contract Data
 
 ## Use Cases
 

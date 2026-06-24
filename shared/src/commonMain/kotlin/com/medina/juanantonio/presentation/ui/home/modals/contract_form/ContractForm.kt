@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -44,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.medina.juanantonio.domain.ContractDataTypes
+import com.medina.juanantonio.domain.models.network.RunsomChallenge
 import com.medina.juanantonio.presentation.composables.LoadingOverlay
 import com.medina.juanantonio.presentation.composables.SlideToActionButton
 import com.medina.juanantonio.presentation.ui.theme.RunsomTheme
@@ -55,12 +57,20 @@ import org.koin.compose.koinInject
 @Composable
 fun ContractModal(
     viewModel: ContractFormViewModel = koinInject(),
+    challenge: RunsomChallenge? = null,
     onSubmit: () -> Unit = {}
 ) {
     val loading by viewModel.isLoadingState
 
+    LaunchedEffect(challenge) {
+        if (challenge == null) return@LaunchedEffect
+        viewModel.setupChallenge(challenge)
+    }
+
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.9F),
         contentAlignment = Alignment.Center
     ) {
         ContractForm(
@@ -72,6 +82,7 @@ fun ContractModal(
             maximumActivityCount = viewModel.maximumActivityCountState,
             minimumActivityDistance = viewModel.minimumActivityDistanceState,
             contractTitle = viewModel.contractTitleState,
+            enableChallengeInputs = challenge == null,
             onSubmit = {
                 viewModel.submitContractForm(onSubmit)
             }
@@ -94,6 +105,7 @@ fun ContractForm(
     maximumActivityCount: TextFieldState,
     minimumActivityDistance: TextFieldState,
     contractTitle: TextFieldState,
+    enableChallengeInputs: Boolean = false,
     onSubmit: suspend () -> Unit = {}
 ) {
     var selectedPricePerKilometerIndex by remember { mutableIntStateOf(-1) }
@@ -103,7 +115,7 @@ fun ContractForm(
             val maxActivities =
                 maximumActivityCount.text.toString().toIntOrNull() ?: 0
 
-            maxActivities != 1
+            maxActivities != 1 && enableChallengeInputs
         }
     }
 
@@ -121,6 +133,8 @@ fun ContractForm(
     }
 
     LaunchedEffect(distanceState.text, selectedActivityState.value) {
+        if (!enableChallengeInputs) return@LaunchedEffect
+
         try {
             val distance = distanceState.text.toString().ifBlank { "0" }.toInt()
 
@@ -221,8 +235,10 @@ fun ContractForm(
                                 selected = index == selectedActivityState.value,
                                 label = { Text(label) },
                                 colors = SegmentedButtonDefaults.colors(
-                                    activeContainerColor = Color(0xFFEEEEEE)
-                                )
+                                    activeContainerColor = Color(0xFFEEEEEE),
+                                    disabledActiveContainerColor = Color(0xFFEEEEEE)
+                                ),
+                                enabled = enableChallengeInputs
                             )
                         }
                     }
@@ -257,7 +273,8 @@ fun ContractForm(
                             .padding(top = 8.dp)
                             .border(
                                 width = 1.dp,
-                                color = Color.Gray,
+                                color = if (enableChallengeInputs) Color.Gray
+                                else Color(0xF0E0E0E0),
                                 shape = RoundedCornerShape(25)
                             )
                             .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -267,9 +284,14 @@ fun ContractForm(
                         BasicTextField(
                             modifier = Modifier.weight(1F),
                             state = distanceState,
+                            enabled = enableChallengeInputs,
                             lineLimits = TextFieldLineLimits.SingleLine,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W400),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.W400,
+                                color = if (enableChallengeInputs) Color.Black
+                                else Color.Gray
+                            ),
                         )
 
                         Text(
@@ -326,7 +348,8 @@ fun ContractForm(
                                 selected = index == selectedPricePerKilometerIndex,
                                 label = { Text(label) },
                                 colors = SegmentedButtonDefaults.colors(
-                                    activeContainerColor = Color(0xFFEEEEEE)
+                                    activeContainerColor = Color(0xFFEEEEEE),
+                                    disabledActiveContainerColor = Color(0xFFEEEEEE)
                                 )
                             )
                         }
@@ -431,8 +454,10 @@ fun ContractForm(
                                     )
                                 },
                                 colors = SegmentedButtonDefaults.colors(
-                                    activeContainerColor = Color(0xFFEEEEEE)
-                                )
+                                    activeContainerColor = Color(0xFFEEEEEE),
+                                    disabledActiveContainerColor = Color(0xFFEEEEEE)
+                                ),
+                                enabled = enableChallengeInputs
                             )
                         }
                     }
@@ -457,7 +482,8 @@ fun ContractForm(
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = Color.Gray,
+                                color = if (enableChallengeInputs) Color.Gray
+                                else Color(0xF0E0E0E0),
                                 shape = RoundedCornerShape(25)
                             )
                             .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -469,7 +495,12 @@ fun ContractForm(
                             state = maximumActivityCount,
                             lineLimits = TextFieldLineLimits.SingleLine,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W400),
+                            enabled = enableChallengeInputs,
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.W400,
+                                color = if (minimumActivityDistanceEnabled) Color.Black
+                                else Color.Gray
+                            ),
                         )
 
                         Text(
@@ -557,7 +588,8 @@ fun ContractForm(
                             .padding(top = 8.dp)
                             .border(
                                 width = 1.dp,
-                                color = Color.Gray,
+                                color = if (enableChallengeInputs) Color.Gray
+                                else Color(0xF0E0E0E0),
                                 shape = RoundedCornerShape(25)
                             )
                             .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -568,8 +600,13 @@ fun ContractForm(
                             modifier = Modifier.weight(1F),
                             state = contractTitle,
                             lineLimits = TextFieldLineLimits.SingleLine,
+                            enabled = enableChallengeInputs,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.W400),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.W400,
+                                color = if (enableChallengeInputs) Color.Black
+                                else Color.Gray
+                            ),
                         )
                     }
                 }

@@ -1,11 +1,12 @@
 package com.medina.juanantonio.data.repository
 
 import com.medina.juanantonio.data.auth.StravaOAuthProvider
-import com.medina.juanantonio.data.network.StravaAPIService
+import com.medina.juanantonio.data.network.StravaRemoteSource
 import com.medina.juanantonio.domain.models.SettingsKeys
 import com.medina.juanantonio.domain.models.network.strava.StravaActivity
 import com.medina.juanantonio.domain.models.network.strava.StravaAthlete
 import com.medina.juanantonio.domain.models.network.NetworkResult
+import com.medina.juanantonio.domain.models.network.strava.StravaOAuthTokenResponse
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.serialization.decodeValueOrNull
@@ -21,7 +22,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 
 class StravaRepository(
     private val oAuthProvider: StravaOAuthProvider,
-    private val apiService: StravaAPIService,
+    private val remoteSource: StravaRemoteSource,
     private val settings: Settings
 ) {
     private var _currentStravaAthlete = MutableStateFlow<StravaAthlete?>(null)
@@ -70,31 +71,35 @@ class StravaRepository(
         page: Int = 1,
         perPage: Int = 30
     ): NetworkResult<List<StravaActivity>> {
-        return apiService.getAthleteActivities(
-            accessToken = currentAccessToken,
-            before = before,
-            after = after,
-            page = page,
-            perPage = perPage
-        )
+        return requestWithTokenRefresh {
+            remoteSource.getAthleteActivities(
+                accessToken = currentAccessToken,
+                before = before,
+                after = after,
+                page = page,
+                perPage = perPage
+            )
+        }
     }
 
     @OptIn(ExperimentalSerializationApi::class, ExperimentalSettingsApi::class)
     suspend fun logout(): NetworkResult<Unit> {
-        val refreshToken = currentStravaAthlete.value?.refreshToken
-            ?: return NetworkResult.Error("No Active Athlete")
+        return requestWithTokenRefresh {
+            val refreshToken = currentStravaAthlete.value?.refreshToken
+                ?: return@requestWithTokenRefresh NetworkResult.Error("No Active Athlete")
 
-        val result = apiService.revokeToken(refreshToken)
-        if (result is NetworkResult.Success) {
-            settings.removeValue<StravaAthlete>(SettingsKeys.STRAVA.ATHLETE)
-            _currentStravaAthlete.tryEmit(null)
+            val result = remoteSource.revokeToken(refreshToken)
+            if (result is NetworkResult.Success) {
+                settings.removeValue<StravaAthlete>(SettingsKeys.STRAVA.ATHLETE)
+                _currentStravaAthlete.tryEmit(null)
+            }
+
+            result
         }
-
-        return result
     }
 
     private suspend fun requestTokenWithCode(code: String) {
-        val result = apiService.requestToken(code)
+        val result = remoteSource.requestToken(code)
 
         if (result is NetworkResult.Success) {
             val data = result.data
@@ -107,8 +112,8 @@ class StravaRepository(
     private suspend fun getFreshAthleteWithToken(
         currentAthlete: StravaAthlete,
         refreshToken: String
-    ) {
-        val result = apiService.refreshToken(refreshToken)
+    ): NetworkResult<StravaOAuthTokenResponse> {
+        val result = remoteSource.refreshToken(refreshToken)
 
         if (result is NetworkResult.Success) {
             currentAccessToken = result.data.access_token
@@ -118,6 +123,8 @@ class StravaRepository(
 
             _currentStravaAthlete.tryEmit(athleteWithToken)
         }
+
+        return result
     }
 
     @OptIn(ExperimentalSerializationApi::class, ExperimentalSettingsApi::class)
@@ -126,5 +133,26 @@ class StravaRepository(
             key = SettingsKeys.STRAVA.ATHLETE,
             value = stravaAthlete
         )
+    }
+
+    private suspend fun <T> requestWithTokenRefresh(
+        networkCall: suspend () -> NetworkResult<T>
+    ): NetworkResult<T> {
+        val initialResult = networkCall()
+        if (initialResult is NetworkResult.Error && initialResult.code == 401) {
+            val currentAthlete = _currentStravaAthlete.value
+            val refreshResult = currentAthlete?.run {
+                getFreshAthleteWithToken(
+                    currentAthlete = this,
+                    refreshToken = refreshToken
+                )
+            } ?: return initialResult
+
+            if (refreshResult is NetworkResult.Success) {
+                return requestWithTokenRefresh(networkCall)
+            }
+        }
+
+        return initialResult
     }
 }

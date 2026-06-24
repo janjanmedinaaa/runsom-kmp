@@ -17,7 +17,7 @@ import kotlinx.coroutines.IO
         Contract::class,
         ContractStravaActivity::class
     ],
-    version = 3,
+    version = 5,
     exportSchema = true
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -41,7 +41,7 @@ fun getRoomDatabase(
         .build()
 }
 
-//@Suppress("KotlinNoActualForExpect")
+@Suppress("KotlinNoActualForExpect")
 expect object DatabaseFactory {
     fun create(): RoomDatabase.Builder<AppDatabase>
 }

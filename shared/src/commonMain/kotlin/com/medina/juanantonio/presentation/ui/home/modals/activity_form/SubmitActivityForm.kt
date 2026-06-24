@@ -1,6 +1,6 @@
 package com.medina.juanantonio.presentation.ui.home.modals.activity_form
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,7 +48,7 @@ import org.koin.compose.koinInject
 fun SubmitActivityModal(
     viewModel: SubmitActivityViewModel = koinInject(),
     contract: ContractWithActivities,
-    onSubmit: () -> Unit = {}
+    onSubmit: (Boolean) -> Unit = {}
 ) {
     val isActivityListLoading by viewModel.activityListLoadingState.collectAsStateWithLifecycle()
     val activityList by viewModel.stravaActivityList.collectAsStateWithLifecycle()
@@ -135,57 +135,18 @@ fun SubmitActivityForm(
             fontWeight = FontWeight.SemiBold
         )
 
-        AnimatedVisibility(visible = !isActivityListLoading) {
-            if (activityList.isEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().height(200.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        modifier = Modifier.size(48.dp).padding(bottom = 8.dp),
-                        imageVector = FeatherIcons.Info,
-                        tint = Color.Black,
-                        contentDescription = null
-                    )
-
-                    Text(
-                        text = "No Activities Found",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center,
-                        color = Color.Black
-                    )
-                }
+        AnimatedContent(
+            targetState = isActivityListLoading
+        ) { isLoading ->
+            if (isLoading) {
+                ActivitiesLoadingSpinner()
             } else {
-                LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
-                    itemsIndexed(
-                        items = activityList,
-                        key = { _, item -> item.id }
-                    ) { index, activity ->
-                        ActivityDisplayItem(
-                            modifier = Modifier.animateItem(),
-                            selected = selectedIndex == index,
-                            activity = activity,
-                            onClick = {
-                                selectedIndex = index
-                            }
-                        )
-                    }
+                ActivityListDisplay(
+                    items = activityList,
+                    selectedIndex = selectedIndex
+                ) {
+                    selectedIndex = it
                 }
-            }
-        }
-
-        AnimatedVisibility(visible = isActivityListLoading) {
-            Box(
-                modifier = Modifier.fillMaxWidth().height(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.width(48.dp),
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                )
             }
         }
 
@@ -217,6 +178,66 @@ fun SubmitActivityForm(
                 modifier = Modifier.padding(8.dp),
                 text = "Submit Activity"
             )
+        }
+    }
+}
+
+@Composable
+fun ActivitiesLoadingSpinner() {
+    Box(
+        modifier = Modifier.fillMaxWidth().height(200.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.width(48.dp),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+    }
+}
+
+@Composable
+fun ActivityListDisplay(
+    items: List<StravaActivity>,
+    selectedIndex: Int,
+    onItemClick: (Int) -> Unit = {}
+) {
+    if (items.isEmpty()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().height(200.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                modifier = Modifier.size(48.dp).padding(bottom = 8.dp),
+                imageVector = FeatherIcons.Info,
+                tint = Color.Black,
+                contentDescription = null
+            )
+
+            Text(
+                text = "No Activities Found",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                color = Color.Black
+            )
+        }
+    } else {
+        LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
+            itemsIndexed(
+                items = items,
+                key = { _, item -> item.id }
+            ) { index, activity ->
+                ActivityDisplayItem(
+                    modifier = Modifier.animateItem(),
+                    selected = selectedIndex == index,
+                    activity = activity,
+                    onClick = {
+                        onItemClick(index)
+                    }
+                )
+            }
         }
     }
 }

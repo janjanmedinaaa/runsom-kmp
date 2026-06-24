@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,7 +23,7 @@ fun LoadingOverlay(
         exit = fadeOut()
     ) {
         Box(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
                 .background(Color.Black.copy(alpha = backgroundAlpha)),
             contentAlignment = Alignment.Center
         ) {

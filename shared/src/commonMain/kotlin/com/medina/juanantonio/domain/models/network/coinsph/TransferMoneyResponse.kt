@@ -5,4 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TransferMoneyResponse(
     val transfer: CoinsPHTransfer
-)
+) : CoinsPHTransferResponse
+
+interface CoinsPHTransferResponse

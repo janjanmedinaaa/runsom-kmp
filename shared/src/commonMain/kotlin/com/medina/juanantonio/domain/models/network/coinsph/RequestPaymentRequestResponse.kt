@@ -7,4 +7,4 @@ import kotlinx.serialization.Serializable
 data class RequestPaymentRequestResponse(
     @SerialName("payment-request")
     val paymentRequest: CoinsPHPaymentRequest
-)
+) : CoinsPHTransferResponse

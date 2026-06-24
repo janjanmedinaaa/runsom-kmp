@@ -2,7 +2,6 @@ package com.medina.juanantonio.domain.models.entities
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import kotlin.math.roundToInt
 
 data class ContractWithActivities(
     @Embedded

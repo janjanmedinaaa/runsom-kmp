@@ -17,7 +17,10 @@ data class Contract(
 
     val title: String = "",
     val maximumActivities: Int = -1,
-    val minimumDistanceKm: Int = 1
+    val minimumDistanceKm: Int = 1,
+
+    val challengeId: String? = null,
+    val withdrawalMonth: String? = null
 ) {
     @get:Ignore
     val isExpired: Boolean

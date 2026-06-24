@@ -21,8 +21,20 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.medina.juanantonio"
+            packageName = "Runsom"
             packageVersion = "1.0.0"
+
+            windows {
+                iconFile.set(project.file("icons/runsom_logo.ico"))
+            }
+
+            macOS {
+                iconFile.set(project.file("icons/runsom_logo.icns"))
+            }
+
+            linux {
+                iconFile.set(project.file("icons/runsom_logo.png"))
+            }
         }
     }
 }

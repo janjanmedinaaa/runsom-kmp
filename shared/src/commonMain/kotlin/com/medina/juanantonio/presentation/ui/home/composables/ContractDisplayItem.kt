@@ -3,6 +3,7 @@ package com.medina.juanantonio.presentation.ui.home.composables
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,28 +18,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.medina.juanantonio.domain.models.entities.Contract
 import com.medina.juanantonio.domain.models.entities.ContractWithActivities
-import kotlin.math.roundToInt
+import com.medina.juanantonio.presentation.utils.TimeUtils.formatRemainingTime
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ContractDisplayItem(
     modifier: Modifier = Modifier,
     contract: ContractWithActivities,
     enabled: Boolean = true,
-    onItemClick: () -> Unit = {}
+    onItemClick: () -> Unit = {},
+    onItemLongClick: () -> Unit = {},
 ) {
     val totalAmount = contract.contract.pricePerKm * contract.contract.distance
     val currentKmCount = contract.activities.sumOf { it.wholeKilometer }
     val currentAmount = currentKmCount * contract.contract.pricePerKm
     val progress = (currentAmount.toFloat() / totalAmount.toFloat())
-    val progressPercentage = (progress * 100).roundToInt()
 
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -48,30 +47,20 @@ fun ContractDisplayItem(
         label = "progress"
     )
 
-    fun formatRemainingTime(startMillis: Long, endMillis: Long): String {
-        val diff = endMillis - startMillis
-        if (diff <= 0) return "Expired"
-
-        val duration = diff.milliseconds
-        val days = duration.inWholeDays
-        val hours = (duration - days.days).inWholeHours
-        val minutes = (duration - days.days - hours.hours).inWholeMinutes
-
-        val parts = buildList {
-            if (days > 0) add("$days day${if (days > 1) "s" else ""}")
-            if (hours > 0) add("$hours hour${if (hours > 1) "s" else ""}")
-            if (minutes > 0) add("$minutes min${if (minutes > 1) "s" else ""}")
-        }
-
-        return parts.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Expired"
-    }
-
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
-        onClick = onItemClick,
-        enabled = enabled
+            .padding(top = 16.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = {
+                        if (enabled) onItemLongClick()
+                    },
+                    onTap = {
+                        if (enabled) onItemClick()
+                    }
+                )
+            }
     ) {
         Column(
             modifier = Modifier
@@ -162,7 +151,11 @@ fun ContractDisplayItem(
                         )
 
                         Text(
-                            text = "${minOf(progressPercentage, 100)}%",
+                            text = if (currentAmount == 0) {
+                                "Goal: ${contract.contract.distance}KM"
+                            } else {
+                                "Remaining: ${contract.contract.distance - currentKmCount}KM left"
+                            },
                             style = MaterialTheme.typography.titleSmall
                         )
                     }

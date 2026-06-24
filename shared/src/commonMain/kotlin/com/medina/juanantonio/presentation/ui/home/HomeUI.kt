@@ -1,5 +1,6 @@
 package com.medina.juanantonio.presentation.ui.home
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,15 +19,14 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.medina.juanantonio.domain.ContractDataTypes.contractCompletionMessages
+import com.medina.juanantonio.domain.ContractDataTypes.noWithdrawalMessages
+import com.medina.juanantonio.domain.ContractDataTypes.withdrawConfirmationMessages
 import com.medina.juanantonio.domain.models.CoinsPHData
 import com.medina.juanantonio.domain.models.entities.Contract
 import com.medina.juanantonio.domain.models.entities.ContractWithActivities
@@ -48,18 +51,23 @@ import com.medina.juanantonio.presentation.composables.AnimatedBottomSheet
 import com.medina.juanantonio.presentation.ui.home.composables.ContractDisplayItem
 import com.medina.juanantonio.presentation.ui.home.modals.ModalDisplay
 import com.medina.juanantonio.presentation.ui.home.modals.activity_form.SubmitActivityModal
+import com.medina.juanantonio.presentation.ui.home.modals.challenges.ChallengesDisplayModal
 import com.medina.juanantonio.presentation.ui.home.modals.contract_form.ContractModal
-import com.medina.juanantonio.presentation.ui.home.modals.logout.LogoutModal
+import com.medina.juanantonio.presentation.ui.home.modals.logout.AlertBottomSheetModal
 import com.medina.juanantonio.presentation.ui.home.modals.settings.SettingsModal
 import com.medina.juanantonio.presentation.ui.theme.RunsomTheme
 import com.medina.juanantonio.presentation.utils.formatAmount
 import com.medina.juanantonio.presentation.utils.toFormattedDateTime
+import com.medina.juanantonio.resources.Res
+import com.medina.juanantonio.resources.celebrating_guy_graphic
+import com.medina.juanantonio.resources.disappointed_guy_graphic
+import com.medina.juanantonio.resources.rocket_graphic
+import com.medina.juanantonio.resources.sad_guy_graphic
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.ChevronRight
+import compose.icons.feathericons.Flag
 import compose.icons.feathericons.Plus
 import compose.icons.feathericons.RefreshCw
 import compose.icons.feathericons.Settings
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
@@ -78,7 +86,9 @@ fun HomeScreenUI(
         activeContractsList = activeContracts,
         onCoinsPhDataRefreshClick = viewModel::refreshCoinsPHData,
         onLoginWithStravaClick = viewModel::loginWithStrava,
-        onLogoutStravaClick = viewModel::logout
+        onLogoutStravaClick = viewModel::logout,
+        onContractLongClick = viewModel::getRemainingMonthlyWithdrawal,
+        onContractWithdrawalClick = viewModel::withdrawFromContract
     )
 }
 
@@ -90,9 +100,10 @@ fun HomeScreenLayout(
     activeContractsList: List<ContractWithActivities>,
     onCoinsPhDataRefreshClick: () -> Unit = {},
     onLoginWithStravaClick: () -> Unit = {},
-    onLogoutStravaClick: (() -> Unit) -> Unit = {}
+    onLogoutStravaClick: (() -> Unit) -> Unit = {},
+    onContractLongClick: ((Int) -> Unit) -> Unit = {},
+    onContractWithdrawalClick: (Int, () -> Unit) -> Unit = { _, _ -> },
 ) {
-    val coroutineScope = rememberCoroutineScope()
     var modalDisplay by remember { mutableStateOf<ModalDisplay?>(null) }
 
     val isFeaturesEnabled = coinsPHData != null && athlete != null
@@ -111,54 +122,86 @@ fun HomeScreenLayout(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row {
-                    if (athlete != null) {
-                        AsyncImage(
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(Color.White)
-                                .size(28.dp),
-                            model = athlete.profile,
-                            contentDescription = null,
-                        )
-                    }
+                    AnimatedContent(athlete) {
+                        Row {
+                            if (it != null) {
+                                AsyncImage(
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .clip(RoundedCornerShape(50))
+                                        .background(Color.White)
+                                        .size(28.dp),
+                                    model = it.profile,
+                                    contentDescription = null,
+                                )
+                            }
 
-                    Text(
-                        text = if (athlete != null) {
-                            "Welcome, ${athlete.fullName}!"
-                        } else {
-                            "Welcome, Runner!"
-                        },
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                            Text(
+                                modifier = Modifier.fillMaxWidth(0.5F),
+                                text = if (it != null) {
+                                    "Welcome, ${it.fullName}!"
+                                } else {
+                                    "Welcome, Runner!"
+                                },
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
+                            )
+                        }
+                    }
                 }
 
                 Row {
-                    if (athlete != null) {
-                        Button(
-                            modifier = Modifier,
-                            onClick = {
-                                modalDisplay = ModalDisplay.Logout()
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                        ) {
-                            Text(
-                                text = "Logout",
-                                color = Color(0xFFFC4C02)
-                            )
-                        }
-                    } else {
-                        Button(
-                            modifier = Modifier,
-                            onClick = onLoginWithStravaClick,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                        ) {
-                            Text(
-                                text = "Login With Strava",
-                                color = Color(0xFFFC4C02)
-                            )
+                    AnimatedContent(athlete) {
+                        if (it != null) {
+                            Row {
+                                IconButton(
+                                    modifier = Modifier.padding(end = 4.dp),
+                                    onClick = { modalDisplay = ModalDisplay.Challenges() },
+                                    colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White)
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.padding(10.dp),
+                                        imageVector = FeatherIcons.Flag,
+                                        contentDescription = null
+                                    )
+                                }
+
+                                Button(
+                                    modifier = Modifier,
+                                    onClick = {
+                                        modalDisplay = ModalDisplay.Alert(
+                                            title = "Logout Strava?",
+                                            description = "Are you sure you want to logout? This will remove your Strava Account and delete all your contracts and activities from this device.",
+                                            positiveButtonText = "Yes, Logout",
+                                            drawableResource = Res.drawable.sad_guy_graphic,
+                                            onPositiveButtonClick = {
+                                                onLogoutStravaClick {
+                                                    modalDisplay = null
+                                                }
+                                            }
+                                        )
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                                ) {
+                                    Text(
+                                        text = "Logout",
+                                        color = Color(0xFFFC4C02)
+                                    )
+                                }
+                            }
+                        } else {
+                            Button(
+                                modifier = Modifier,
+                                onClick = onLoginWithStravaClick,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                            ) {
+                                Text(
+                                    text = "Login With Strava",
+                                    color = Color(0xFFFC4C02)
+                                )
+                            }
                         }
                     }
                 }
@@ -259,9 +302,7 @@ fun HomeScreenLayout(
                             enabled = isFeaturesEnabled,
                             text = "Create Contract"
                         ) {
-                            coroutineScope.launch {
-                                modalDisplay = ModalDisplay.ContractForm()
-                            }
+                            modalDisplay = ModalDisplay.ContractForm()
                         }
                     }
                 }
@@ -288,24 +329,24 @@ fun HomeScreenLayout(
                     )
                 }
 
-                TextButton(
-                    onClick = {}
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "View All",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.Black
-                        )
-
-                        Icon(
-                            modifier = Modifier.size(20.dp),
-                            imageVector = FeatherIcons.ChevronRight,
-                            contentDescription = null,
-                            tint = Color.Black
-                        )
-                    }
-                }
+//                TextButton(
+//                    onClick = {}
+//                ) {
+//                    Row(verticalAlignment = Alignment.CenterVertically) {
+//                        Text(
+//                            text = "View All",
+//                            style = MaterialTheme.typography.titleMedium,
+//                            color = Color.Black
+//                        )
+//
+//                        Icon(
+//                            modifier = Modifier.size(20.dp),
+//                            imageVector = FeatherIcons.ChevronRight,
+//                            contentDescription = null,
+//                            tint = Color.Black
+//                        )
+//                    }
+//                }
             }
         }
 
@@ -316,12 +357,33 @@ fun HomeScreenLayout(
             ContractDisplayItem(
                 modifier = Modifier.animateItem(),
                 contract = contract,
-                enabled = isFeaturesEnabled
-            ) {
-                coroutineScope.launch {
+                enabled = isFeaturesEnabled,
+                onItemClick = {
                     modalDisplay = ModalDisplay.SubmitActivityForm(contract)
+                },
+                onItemLongClick = {
+                    onContractLongClick { count ->
+                        val (title, description, buttonText) =
+                            (if (count == 0) noWithdrawalMessages
+                            else withdrawConfirmationMessages).random()
+
+                        modalDisplay = ModalDisplay.Alert(
+                            title = title,
+                            description = description.replace(
+                                oldValue = "{{ withdrawLimitRemaining }}",
+                                newValue = "$count"
+                            ),
+                            positiveButtonText = buttonText,
+                            drawableResource = Res.drawable.disappointed_guy_graphic,
+                            onPositiveButtonClick = {
+                                onContractWithdrawalClick(contract.contract.id) {
+                                    modalDisplay = null
+                                }
+                            }
+                        )
+                    }
                 }
-            }
+            )
         }
     }
 
@@ -331,36 +393,59 @@ fun HomeScreenLayout(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         onDismissRequest = { modalDisplay = null }
     ) {
-        when (val display = modalDisplay) {
-            is ModalDisplay.ContractForm -> {
-                ContractModal {
-                    modalDisplay = null
+        AnimatedContent(targetState = modalDisplay) {
+            when (val display = modalDisplay) {
+                is ModalDisplay.ContractForm -> {
+                    ContractModal(
+                        challenge = display.challenge
+                    ) {
+                        modalDisplay = null
+                    }
                 }
-            }
 
-            is ModalDisplay.SubmitActivityForm -> {
-                SubmitActivityModal(contract = display.contract) {
-                    modalDisplay = null
-                }
-            }
-
-            is ModalDisplay.Settings -> {
-                SettingsModal {
-                    modalDisplay = null
-                }
-            }
-
-            is ModalDisplay.Logout -> {
-                LogoutModal(
-                    onPositiveButtonClick = {
-                        onLogoutStravaClick {
+                is ModalDisplay.SubmitActivityForm -> {
+                    SubmitActivityModal(contract = display.contract) { isComplete ->
+                        if (isComplete) {
+                            val (title, description, buttonText) = contractCompletionMessages.random()
+                            modalDisplay = ModalDisplay.Alert(
+                                title = title,
+                                description = description,
+                                positiveButtonText = buttonText,
+                                drawableResource = listOf(
+                                    Res.drawable.rocket_graphic,
+                                    Res.drawable.celebrating_guy_graphic
+                                ).random()
+                            )
+                        } else {
                             modalDisplay = null
                         }
                     }
-                )
-            }
+                }
 
-            else -> {}
+                is ModalDisplay.Settings -> {
+                    SettingsModal {
+                        modalDisplay = null
+                    }
+                }
+
+                is ModalDisplay.Challenges -> {
+                    ChallengesDisplayModal {
+                        modalDisplay = ModalDisplay.ContractForm(it)
+                    }
+                }
+
+                is ModalDisplay.Alert -> {
+                    AlertBottomSheetModal(
+                        title = display.title,
+                        description = display.description,
+                        drawableResource = display.drawableResource,
+                        positiveButtonText = display.positiveButtonText,
+                        onPositiveButtonClick = display.onPositiveButtonClick
+                    )
+                }
+
+                else -> {}
+            }
         }
     }
 }

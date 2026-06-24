@@ -4,6 +4,7 @@ import com.medina.juanantonio.data.local.ContractLocalDataSource
 import com.medina.juanantonio.data.local.ContractStravaActivityLocalDataSource
 import com.medina.juanantonio.data.repository.CoinsPHRepository
 import com.medina.juanantonio.data.repository.ContractRepository
+import com.medina.juanantonio.data.repository.RunsomRepository
 import com.medina.juanantonio.data.repository.StravaRepository
 import org.koin.dsl.module
 
@@ -11,7 +12,7 @@ val repositoryModule = module {
     single {
         StravaRepository(
             oAuthProvider = get(),
-            apiService = get(),
+            remoteSource = get(),
             settings = get()
         )
     }
@@ -19,7 +20,7 @@ val repositoryModule = module {
     single {
         CoinsPHRepository(
             settings = get(),
-            apiService = get()
+            remoteSource = get()
         )
     }
 
@@ -39,6 +40,13 @@ val repositoryModule = module {
         ContractRepository(
             contractLocalDataSource = get(),
             activityLocalDataSource = get()
+        )
+    }
+
+    single {
+        RunsomRepository(
+            challengesRemoteSource = get(),
+            contractRepository = get()
         )
     }
 }
