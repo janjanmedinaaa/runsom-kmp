@@ -414,7 +414,10 @@ fun HomeScreenLayout(
                                 drawableResource = listOf(
                                     Res.drawable.rocket_graphic,
                                     Res.drawable.celebrating_guy_graphic
-                                ).random()
+                                ).random(),
+                                onPositiveButtonClick = {
+                                    modalDisplay = null
+                                }
                             )
                         } else {
                             modalDisplay = null
