@@ -214,6 +214,10 @@ Create a contract for your spouse, partner, child, friend, or training partner.
 
 Reward them for completing activities while maintaining accountability through an escrow account.
 
+### Race Preparation
+
+Set aside your race registration money and lock it in a contract. Complete your training runs to gradually unlock the funds, helping you stay committed to your race goals before registration day.
+
 ### Fitness Accountability Groups
 
 Friends can act as each other's escrow partners.
@@ -237,7 +241,6 @@ Create contracts around specific goals:
 * Run 100 km this month
 * Complete 20 workouts
 * Finish a cycling challenge
-* Prepare for a race or event
 
 ## Platforms
 
