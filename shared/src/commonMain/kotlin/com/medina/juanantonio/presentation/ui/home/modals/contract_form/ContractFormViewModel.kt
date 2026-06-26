@@ -41,7 +41,10 @@ class ContractFormViewModel(
     private val pricePerKm: Int
         get() = pricePerKilometer.text.toString().toIntOrNull() ?: 0
     private val selectedTimeLimit
-        get() = ContractDataTypes.defaultContractExpiration[selectedTimeLimitState.value].second
+        get() = challenge?.dayLimit ?: ContractDataTypes.defaultContractExpiration.run {
+            val dayLimit = getOrNull(selectedTimeLimitState.value)?.second
+            dayLimit ?: -1
+        }
     private val maximumActivityCount
         get() = maximumActivityCountState.text.toString().toIntOrNull() ?: -1
     private val minimumActivityDistance

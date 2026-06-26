@@ -63,6 +63,8 @@ class SubmitActivityViewModel(
 
             if (result is NetworkResult.Success) {
                 contractRepository.addActivityToContract(contractId, selectedActivity)
+            } else if (result is NetworkResult.Error) {
+                uiEventManager.showSnackBarMessage(result.message)
             }
 
             val isContractFinished =

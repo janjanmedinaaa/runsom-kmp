@@ -163,7 +163,7 @@ fun OwnerAccountInputCard(
             )
 
             Text(
-                text = "Make sure you have correctly IP-Whitelisted your API Key",
+                text = "Make sure you have correctly IP-Whitelisted your API Key.",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
@@ -243,6 +243,16 @@ fun EscrowAccountInputCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
+
+                    AnimatedContent(autoPaymentsEnabled.value) { enabled ->
+                        if (enabled) {
+                            Text(
+                                text = "Make sure you have correctly IP-Whitelisted the Escrow API Key.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+                    }
                 }
 
                 Switch(
