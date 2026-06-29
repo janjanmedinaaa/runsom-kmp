@@ -124,14 +124,18 @@ class ContractFormViewModel(
 
         distanceState.setTextAndPlaceCursorAtEnd("${challenge.distance}")
 
-        val selectedExpirationIndex = ContractDataTypes.defaultContractExpiration.run {
-            val item = firstOrNull {
-                it.second == challenge.dayLimit
-            }
+        selectedTimeLimitState.value = if (!challenge.hasValidDeadline) {
+            val selectedExpirationIndex = ContractDataTypes.defaultContractExpiration.run {
+                val item = firstOrNull {
+                    it.second == challenge.dayLimit
+                }
 
-            indexOf(item)
+                indexOf(item)
+            }
+            selectedExpirationIndex
+        } else {
+            -1
         }
-        selectedTimeLimitState.value = selectedExpirationIndex
 
         if (challenge.maximumActivities != -1) {
             maximumActivityCountState.setTextAndPlaceCursorAtEnd("${challenge.maximumActivities}")
